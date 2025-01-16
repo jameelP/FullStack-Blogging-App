@@ -7,7 +7,7 @@ resource "azurerm_resource_group" "devops_rg" {
   location = "East US"
 }
 
-resource "azurerm_virtual_network" "devops-vnet" {
+resource "azurerm_virtual_network" "devops_vnet" {
   name                = "devops-vnet"
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.devops_rg.location
