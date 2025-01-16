@@ -1,5 +1,6 @@
 provider "azurerm" {
   features {}
+  subscription_id = "000000-000000-0000000-0000000"
 }
 
 resource "azurerm_resource_group" "devops_rg" {
@@ -34,6 +35,7 @@ resource "azurerm_network_security_rule" "devops_nsg_rule" {
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
+  source_port_range           = "*"
   destination_port_range      = "22"
   source_address_prefix       = "*"
   destination_address_prefix  = "*"
@@ -46,7 +48,7 @@ resource "azurerm_public_ip" "devops_pip" {
   name                = "devops-public-ip-${count.index}"
   location            = azurerm_resource_group.devops_rg.location
   resource_group_name = azurerm_resource_group.devops_rg.name
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
 }
 
 resource "azurerm_network_interface" "devops_nic" {
@@ -83,5 +85,5 @@ resource "azurerm_kubernetes_cluster" "devops_aks" {
 resource "azurerm_role_assignment" "devops_role_assignment" {
   scope                = azurerm_kubernetes_cluster.devops_aks.id
   role_definition_name = "Reader"
-  principal_id         = azurerm_kubernetes_cluster.devops_aks.kubelet_identity.0.object_id
+  principal_id         = azurerm_kubernetes_cluster.devops_aks.kubelet_identity[0].object_id
 }
