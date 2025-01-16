@@ -18,7 +18,7 @@ resource "azurerm_subnet" "devops_subnet" {
   count               = 2
   name                = "devops-subnet-${count.index}"
   resource_group_name = azurerm_resource_group.devops_rg.name
-  virtual_network_name= azurerm_virtual_network.devops_rg.name
+  virtual_network_name= azurerm_virtual_network.devops_vnet.name
   address_prefixes    = ["10.0.${count.index}.0/24"]
 }
 
