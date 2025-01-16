@@ -2,33 +2,33 @@ provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "example" {
-  name     = "devopsshack-resources"
+resource "azurerm_resource_group" "devops_rg" {
+  name     = "devops-resource-group"
   location = "East US"
 }
 
-resource "azurerm_virtual_network" "example" {
-  name                = "devopsshack-vnet"
+resource "azurerm_virtual_network" "devops-vnet" {
+  name                = "devops-vnet"
   address_space       = ["10.0.0.0/16"]
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
+  location            = azurerm_resource_group.devops_rg.location
+  resource_group_name = azurerm_resource_group.devops_rg.name
 }
 
-resource "azurerm_subnet" "example" {
+resource "azurerm_subnet" "devops_subnet" {
   count               = 2
-  name                = "devopsshack-subnet-${count.index}"
-  resource_group_name = azurerm_resource_group.example.name
-  virtual_network_name= azurerm_virtual_network.example.name
+  name                = "devops-subnet-${count.index}"
+  resource_group_name = azurerm_resource_group.devops_rg.name
+  virtual_network_name= azurerm_virtual_network.devops_rg.name
   address_prefixes    = ["10.0.${count.index}.0/24"]
 }
 
-resource "azurerm_network_security_group" "example" {
-  name                = "devopsshack-nsg"
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
+resource "azurerm_network_security_group" "devops_nsg" {
+  name                = "devops-nsg"
+  location            = azurerm_resource_group.devops_rg.location
+  resource_group_name = azurerm_resource_group.devops_rg.name
 }
 
-resource "azurerm_network_security_rule" "example" {
+resource "azurerm_network_security_rule" "devops_nsg_rule" {
   count                       = 2
   name                        = "allow_inbound_ssh${count.index}"
   priority                    = 100 + count.index
@@ -38,36 +38,36 @@ resource "azurerm_network_security_rule" "example" {
   destination_port_range      = "22"
   source_address_prefix       = "*"
   destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.example.name
-  network_security_group_name = azurerm_network_security_group.example.name
+  resource_group_name         = azurerm_resource_group.devops_rg.name
+  network_security_group_name = azurerm_network_security_group.devops_nsg.name
 }
 
-resource "azurerm_public_ip" "example" {
+resource "azurerm_public_ip" "devops_pip" {
   count               = 2
-  name                = "devopsshack-public-ip-${count.index}"
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
+  name                = "devops-public-ip-${count.index}"
+  location            = azurerm_resource_group.devops_rg.location
+  resource_group_name = azurerm_resource_group.devops_rg.name
   allocation_method   = "Dynamic"
 }
 
-resource "azurerm_network_interface" "example" {
+resource "azurerm_network_interface" "devops_nic" {
   count               = 2
-  name                = "devopsshack-nic-${count.index}"
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
+  name                = "devops-nic-${count.index}"
+  location            = azurerm_resource_group.devops_rg.location
+  resource_group_name = azurerm_resource_group.devops_rg.name
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = element(azurerm_subnet.example, count.index).id
+    subnet_id                     = element(azurerm_subnet.devops_subnet, count.index).id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = element(azurerm_public_ip.example, count.index).id
+    public_ip_address_id          = element(azurerm_public_ip.devops_pip, count.index).id
   }
 }
 
-resource "azurerm_kubernetes_cluster" "example" {
+resource "azurerm_kubernetes_cluster" "devops_aks" {
   name                = "devopsshack-cluster"
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
+  location            = azurerm_resource_group.devops_rg.location
+  resource_group_name = azurerm_resource_group.devops_rg.name
   dns_prefix          = "devopsshack"
 
   default_node_pool {
@@ -81,9 +81,8 @@ resource "azurerm_kubernetes_cluster" "example" {
   }
 }
 
-resource "azurerm_role_assignment" "example" {
-  scope                = azurerm_kubernetes_cluster.example.id
+resource "azurerm_role_assignment" "devops_role_assignment" {
+  scope                = azurerm_kubernetes_cluster.devops_aks.id
   role_definition_name = "Reader"
-  principal_id         = azurerm_kubernetes_cluster.example.kubelet_identity[0].object_id
+  principal_id         = azurerm_kubernetes_cluster.devops_aks.kubelet_identity[0].object_id
 }
-
