@@ -29,9 +29,8 @@ resource "azurerm_network_security_group" "devops_nsg" {
 }
 
 resource "azurerm_network_security_rule" "devops_nsg_rule" {
-  count                       = 2
-  name                        = "allow_inbound_ssh${count.index}"
-  priority                    = 100 + count.index
+  name                        = "allow_inbound_ssh"
+  priority                    = 100
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
@@ -84,5 +83,5 @@ resource "azurerm_kubernetes_cluster" "devops_aks" {
 resource "azurerm_role_assignment" "devops_role_assignment" {
   scope                = azurerm_kubernetes_cluster.devops_aks.id
   role_definition_name = "Reader"
-  principal_id         = azurerm_kubernetes_cluster.devops_aks.kubelet_identity[0].object_id
+  principal_id         = azurerm_kubernetes_cluster.devops_aks.kubelet_identity.0.object_id
 }
