@@ -6,7 +6,7 @@ variable "location" {
 
 variable "resource_group" {
   description = "The name of the resource group"
-  default     = "devopsshack-resources"
+  default     = "devops-resource-group"
   type        = string
 }
 
